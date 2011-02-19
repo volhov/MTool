@@ -49,6 +49,7 @@ class Mtool_Codegen_Filesystem
      *
      * @param string $filepath
      * @static
+     * @throws Mtool_Codegen_Exception_Filesystem
      * @return string
      */
     public static function read($filepath)
@@ -68,6 +69,7 @@ class Mtool_Codegen_Filesystem
      * @param string $filepath
      * @param string $content
      * @static
+     * @throws Mtool_Codegen_Exception_Filesystem
      * @return string
      */
     public static function write($filepath, $content)
