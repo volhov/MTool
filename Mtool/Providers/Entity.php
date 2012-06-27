@@ -67,6 +67,7 @@ class Mtool_Providers_Entity extends Mtool_Providers_Abstract
         list($namespace, $entityName) = explode('/', $entityPath);
 
         $module = Mtool_Codegen_Entity_Module_Finder::byNamespace(getcwd(), $entity, $namespace, $this->_getConfig());
+
         if ($module == null) {
             $targetModule = $this->_ask("Unfortunately module with {$name} namespace '{$namespace}' was not found. Enter the target module (in format of Mycompany/Mymodule)");
             list($companyName, $moduleName) = explode('/', $targetModule);

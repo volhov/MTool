@@ -112,4 +112,32 @@ class Mtool_Magento
     {
         return dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'Mtool';
     }
+
+    /**
+     * Get design frontend directory path
+     *
+     * @return string
+     */
+    public function getDesignFrontendDir()
+    {
+        return $this->_root . 'app' .
+            DIRECTORY_SEPARATOR . 'design' .
+            DIRECTORY_SEPARATOR . 'frontend' .
+            DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * Get design adminhtml directory path
+     *
+     * @return string
+     */
+    public function getDesignAdminhtmlDir()
+    {
+        return $this->_root . 'app' .
+            DIRECTORY_SEPARATOR . 'design' .
+            DIRECTORY_SEPARATOR . 'adminhtml' .
+            DIRECTORY_SEPARATOR . 'default' .
+            DIRECTORY_SEPARATOR . 'default' .
+            DIRECTORY_SEPARATOR;
+    }
 }

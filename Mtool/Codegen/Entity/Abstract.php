@@ -158,7 +158,12 @@ abstract class Mtool_Codegen_Entity_Abstract
 
         // Move class template file
         $classTemplate = new Mtool_Codegen_Template($template);
-        $resultingClassName = "{$module->getName()}_{$this->_entityName}_{$className}";
+        if (!empty($this->_entityName)){
+            $resultingClassName = "{$module->getName()}_{$this->_entityName}_{$className}";
+        } else {
+            $resultingClassName = "{$module->getName()}_{$className}";
+        }
+
 
         if (strlen('class ' . $resultingClassName) >= self::RECOMMENDED_ZEND_CODING_STANDARD_LINE_LENGTH) {
             $resultingClassName .= "\n   ";
@@ -176,6 +181,63 @@ abstract class Mtool_Codegen_Entity_Abstract
                 ->move($classDir, $classFilename);
 
         return $resultingClassName;
+    }
+
+    /**
+     * Modify class file
+     *
+     * @param string $path in format: class_path_string
+     * @param string $template
+     * @param string $actionName
+     * @param Mtool_Codegen_Entity_Module $module
+     * @param array $params
+     * @return resulting class name
+     */
+    public function modifyClass($path, $template, $actionName, $module, $params = array())
+    {
+        $pathSteps = $this->_ucPath(explode('_', $path));
+        $className = implode('_', $pathSteps);
+        $classFilename = array_pop($pathSteps) . '.php';
+
+        // Create class dir under module
+        $classDir = Mtool_Codegen_Filesystem::slash($module->getDir()) . $this->_folderName .
+            DIRECTORY_SEPARATOR .
+            implode(DIRECTORY_SEPARATOR, $pathSteps);
+
+        // Move class template file
+        $classTemplate = new Mtool_Codegen_Template($template);
+        if (!empty($this->_entityName)){
+            $resultingClassName = "{$module->getName()}_{$this->_entityName}_{$className}";
+        } else {
+            $resultingClassName = "{$module->getName()}_{$className}";
+        }
+
+        $controllerPath = $classDir . DIRECTORY_SEPARATOR . $classFilename;
+        if (!file_exists($controllerPath) )
+            throw new Mtool_Codegen_Exception_Module(
+                "Can`t find Controller: {$controllerPath}. Aborting."
+            );
+
+
+        if (strlen('class ' . $resultingClassName) >= self::RECOMMENDED_ZEND_CODING_STANDARD_LINE_LENGTH) {
+            $resultingClassName .= "\n   ";
+        }
+
+        $defaultParams = array(
+            'company_name' => $module->getCompanyName(),
+            'module_name' => $module->getModuleName(),
+            'class_name' => $resultingClassName,
+            'action_name' => strtolower($actionName),
+            'year' => date('Y'),
+        );
+
+        $classTemplate->setParams(array_merge($defaultParams, $params, $module->getTemplateParams()));
+
+        $controllerContent = file($controllerPath);
+        unset($controllerContent[sizeof($controllerContent)-1]);
+        $controllerContent = implode('', $controllerContent) . "\n" . $classTemplate->content() . "\n}";
+
+        Mtool_Codegen_Filesystem::write($controllerPath, $controllerContent);
     }
 
     /**

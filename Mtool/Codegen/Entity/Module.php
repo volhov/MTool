@@ -76,6 +76,30 @@ class Mtool_Codegen_Entity_Module extends Mtool_Codegen_Entity_Abstract
     protected $_templateParams = array();
 
     /**
+     * Module frontend layout dir path
+     * @var string
+     */
+    protected $_moduleFrontendLayoutDir;
+
+    /**
+     * Module frontend phtm dir path
+     * @var string
+     */
+    protected $_moduleFrontendPhtmlDir;
+
+    /**
+     * Module adminhtml layout dir path
+     * @var string
+     */
+    protected $_moduleAdminhtmlLayoutDir;
+
+    /**
+     * Module adminhtml phtm dir path
+     * @var string
+     */
+    protected $_moduleAdminhtmlPhtmlDir;
+
+    /**
      * Init environemnt
      *
      * @param string $root absolute path to magento root
@@ -99,6 +123,33 @@ class Mtool_Codegen_Entity_Module extends Mtool_Codegen_Entity_Abstract
 
         $this->_moduleConfigsDir = $this->_moduleDir . DIRECTORY_SEPARATOR . 'etc';
         $this->_moduleSqlDir = $this->_moduleDir . DIRECTORY_SEPARATOR . 'sql';
+
+        $this->_moduleAdminhtmlPhtmlDir = $this->_mage->getDesignAdminhtmlDir()
+            . 'template'
+            . DIRECTORY_SEPARATOR
+            . strtolower($this->_companyName)
+            . DIRECTORY_SEPARATOR
+            . strtolower($this->_moduleName) ;
+
+        $this->_moduleAdminhtmlLayoutDir = $this->_mage->getDesignAdminhtmlDir() .  'layout';
+
+        $this->_moduleFrontendPhtmlDir = $this->_mage->getDesignFrontendDir()
+            . $this->getTemplateParamByKey('theme')
+            . DIRECTORY_SEPARATOR
+            . 'default'
+            . DIRECTORY_SEPARATOR
+            . 'template'
+            . DIRECTORY_SEPARATOR
+            . strtolower($this->_companyName)
+            . DIRECTORY_SEPARATOR
+            . strtolower($this->_moduleName) ;
+
+        $this->_moduleFrontendLayoutDir = $this->_mage->getDesignFrontendDir()
+            . $this->getTemplateParamByKey('theme')
+            . DIRECTORY_SEPARATOR
+            . 'default'
+            . DIRECTORY_SEPARATOR
+            . 'layout';
     }
 
     /**
@@ -307,13 +358,14 @@ class Mtool_Codegen_Entity_Module extends Mtool_Codegen_Entity_Abstract
      */
     public function getModuleName()
     {
-        return $this->_moduleName;
+        return strtolower($this->_moduleName);
     }
 
     /**
      * Find file through modules
      *
      * @param string $search
+     *
      * @return RegexIterator
      */
     public function findThroughModules($search)
@@ -331,4 +383,110 @@ class Mtool_Codegen_Entity_Module extends Mtool_Codegen_Entity_Abstract
         return $this->_templateParams;
     }
 
+    /**
+     * Get param value by key name.
+     *
+     * @param string $key name of param
+     * @param string $default default value
+     *
+     * @return string
+     */
+    public function getTemplateParamByKey($key, $default=null)
+    {
+        return array_key_exists($key, $this->_templateParams) ? $this->_templateParams[$key] : $default;
+    }
+
+
+    public function getModuleAdminhtmlLayoutDir()
+    {
+        return $this->_moduleAdminhtmlLayoutDir;
+    }
+
+    public function getModuleAdminhtmlPhtmlDir()
+    {
+        return $this->_moduleAdminhtmlPhtmlDir;
+    }
+
+    public function getModuleFrontendLayoutDir()
+    {
+        return $this->_moduleFrontendLayoutDir;
+    }
+
+    public function getModuleFrontendPhtmlDir()
+    {
+        return $this->_moduleFrontendPhtmlDir;
+    }
+
+    /**
+     * Add layout module,xml file and add correspond section to tghe module config:
+     *     1. create module folder under app/code/local
+     *     2. create module config.xml file
+     *
+     * @return void
+     */
+    public function addLayout()
+    {
+        // Check that module does not already exist
+        if (!$this->exists())
+            throw new Mtool_Codegen_Exception_Module(
+                "Seems like this module not installed yet. Aborting."
+            );
+
+        // Check module phtm dir and create it if it is absent.
+        if (! Mtool_Codegen_Filesystem::exists($this->_moduleFrontendPhtmlDir)) {
+            Mtool_Codegen_Filesystem::mkdir($this->_moduleFrontendPhtmlDir);
+        }
+
+        $name = $this->getName();
+
+        $params = array(
+            'module_name' => $name,
+            'module' => $this->_moduleName,
+            'company_name' => $this->getCompanyName(),
+            'year' => date('Y'),
+        );
+
+        // Modifiy config.xml file. Add frontend layout section
+        $config = new Mtool_Codegen_Config($this->getConfigPath('config.xml'));
+        $config->set("frontend/layout/updates/{$this->getModuleName()}/file", $this->getModuleName() . '.xml');
+        $configTemplate = new Mtool_Codegen_Template('module_layout');
+        $configTemplate
+            ->setParams(array_merge($params, $this->_templateParams))
+            ->move($this->_moduleFrontendLayoutDir, $this->getModuleName() . '.xml');
+
+    }
+
+    /**
+     * Add layout module,xml file and add correspond section to tghe module config:
+     *     1. create module folder under app/code/local
+     *     2. create module config.xml file
+     *
+     * @return void
+     */
+    public function addAdminLayout()
+    {
+        // Check that module does not already exist
+        if (!$this->exists())
+            throw new Mtool_Codegen_Exception_Module(
+                "Seems like this module not installed yet. Aborting."
+            );
+
+        $name = $this->getName();
+
+        $params = array(
+            'module_name' => $name,
+            'module' => $this->_moduleName,
+            'company_name' => $this->getCompanyName(),
+            'year' => date('Y'),
+        );
+
+        // Modifiy config.xml file. Add frontend layout section
+        $config = new Mtool_Codegen_Config($this->getConfigPath('config.xml'));
+        $config->set("adminhtml/layout/updates/{$this->getModuleName()}/file", $this->getModuleName() . '.xml');
+
+        $configTemplate = new Mtool_Codegen_Template('module_layout');
+        $configTemplate
+            ->setParams(array_merge($params, $this->_templateParams))
+            ->move($this->_moduleAdminhtmlLayoutDir, $this->getModuleName() . '.xml');
+    }
 }

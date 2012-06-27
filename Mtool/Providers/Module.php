@@ -108,4 +108,46 @@ class Mtool_Providers_Module extends Mtool_Providers_Abstract
         $this->_answer('Done');
     }
 
+    /**
+     * Add frontend layout
+     *
+     * @param string $name in format of companyname/modulename
+     *
+     * @return void
+     */
+    public function addLayout($name = null)
+    {
+        if ($name == null || false === strpos($name, '/')) {
+            $companyName = $this->_ask('Enter the company name');
+            $moduleName = $this->_ask('Enter the module name');
+        }
+        else list($companyName, $moduleName) = explode('/', $name);
+
+        $module = new Mtool_Codegen_Entity_Module(getcwd(), $moduleName, $companyName, $this->_getConfig());
+        $module->addLayout();
+
+        $this->_answer('Done');
+    }
+
+    /**
+     * Add adminhtml layout
+     *
+     * @param string $name in format of companyname/modulename
+     *
+     * @return void
+     */
+    public function addAdminLayout($name = null)
+    {
+        if ($name == null || false === strpos($name, '/')) {
+            $companyName = $this->_ask('Enter the company name');
+            $moduleName = $this->_ask('Enter the module name');
+        }
+        else list($companyName, $moduleName) = explode('/', $name);
+
+        $module = new Mtool_Codegen_Entity_Module(getcwd(), $moduleName, $companyName, $this->_getConfig());
+        $module->addAdminLayout();
+
+        $this->_answer('Done');
+    }
+
 }

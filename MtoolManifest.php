@@ -27,6 +27,7 @@ class MtoolManifest implements Zend_Tool_Framework_Manifest_ProviderManifestable
     /**
      * Register autoload for the tool
      */
+
     public function __construct()
     {
         $autoloader = Zend_Loader_Autoloader::getInstance();
@@ -46,6 +47,7 @@ class MtoolManifest implements Zend_Tool_Framework_Manifest_ProviderManifestable
             new Mtool_Providers_Rmodel(),
             new Mtool_Providers_Helper(),
             new Mtool_Providers_Block(),
+            new Mtool_Providers_Controller(),
         );
     }
 
